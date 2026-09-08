@@ -1,11 +1,15 @@
 @model BreachIn.Models.Opportunity
 @{
+    const int descriptionPreviewLength = 500;
     var sponsorshipBadgeClass = Model.SponsorshipStatus switch
     {
         "Sponsorship Likely" => "text-bg-success",
         "Sponsorship Unclear" => "text-bg-warning",
         _ => "text-bg-secondary"
     };
+    var description = Model.Description.Length > descriptionPreviewLength
+        ? $"{Model.Description[..descriptionPreviewLength]}…"
+        : Model.Description;
 }
 
 <article class="card shadow-sm h-100">
@@ -31,7 +35,7 @@
             <dd class="col-sm-9">@Model.JobType</dd>
 
             <dt class="col-sm-3">Description</dt>
-            <dd class="col-sm-9">@Model.Description</dd>
+            <dd class="col-sm-9">@description</dd>
 
             @if (Model.PostedDate.HasValue)
             {

@@ -4,7 +4,33 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddSingleton<IJobSource, SampleJobSource>();
+builder.Services.AddHttpClient(LeverJobSource.HttpClientName, client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd(
+        "BreachIn/0.1 (+https://github.com/jons0605/BreachIn)");
+});
+builder.Services
+    .AddOptions<LeverJobSourceOptions>()
+    .Bind(builder.Configuration.GetSection(LeverJobSourceOptions.SectionName))
+    .Validate(
+        options => !options.Enabled || options.Sites.Count > 0,
+        "At least one Lever site is required when the Lever source is enabled.")
+    .Validate(
+        options => options.Sites.All(site =>
+            !string.IsNullOrWhiteSpace(site.SiteName)
+            && !string.IsNullOrWhiteSpace(site.CompanyName)
+            && site.SiteName.All(character =>
+                char.IsAsciiLetterOrDigit(character) || character == '-')),
+        "Lever site names may contain only letters, numbers, and hyphens, and company names are required.")
+    .ValidateOnStart();
+builder.Services.AddSingleton<IJobSource, LeverJobSource>();
+
+if (builder.Configuration.GetValue("SampleData:Enabled", false))
+{
+    builder.Services.AddSingleton<IJobSource, SampleJobSource>();
+}
+
 builder.Services.AddSingleton<IJobStore>(serviceProvider =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
