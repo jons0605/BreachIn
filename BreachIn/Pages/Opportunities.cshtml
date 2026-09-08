@@ -28,10 +28,71 @@
                     <label asp-for="HasVisaSponsorshipPotential" class="form-check-label"></label>
                 </div>
 
-                <button type="submit" class="btn btn-success">
+                <button type="submit" name="SearchSubmitted" value="true" class="btn btn-success">
                     Search Opportunities
                 </button>
             </div>
         </form>
+
+        @if (Model.SearchSubmitted)
+        {
+            <section class="mt-5" aria-labelledby="results-heading">
+                <h2 id="results-heading" class="h3">Sample Opportunities</h2>
+                <p class="text-muted">Sample data — live job sources not connected yet</p>
+
+                @if (Model.Opportunities.Count == 0)
+                {
+                    <div class="alert alert-info" role="status">
+                        No sample opportunities matched your search.
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var opportunity in Model.Opportunities)
+                        {
+                            var sponsorshipBadgeClass = opportunity.SponsorshipStatus switch
+                            {
+                                "Sponsorship Likely" => "text-bg-success",
+                                "Sponsorship Unclear" => "text-bg-warning",
+                                _ => "text-bg-secondary"
+                            };
+
+                            <div class="col-12">
+                                <article class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                                            <div>
+                                                <h3 class="card-title h4 mb-1">@opportunity.JobTitle</h3>
+                                                <p class="card-subtitle text-muted">@opportunity.Company</p>
+                                            </div>
+                                            <div>
+                                                <span class="badge @sponsorshipBadgeClass">
+                                                    @opportunity.SponsorshipStatus
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <dl class="row mt-4 mb-0">
+                                            <dt class="col-sm-3">Location</dt>
+                                            <dd class="col-sm-9">@opportunity.Location</dd>
+
+                                            <dt class="col-sm-3">Salary</dt>
+                                            <dd class="col-sm-9">@opportunity.Salary</dd>
+
+                                            <dt class="col-sm-3">Job type</dt>
+                                            <dd class="col-sm-9">@opportunity.JobType</dd>
+
+                                            <dt class="col-sm-3">Sponsorship evidence</dt>
+                                            <dd class="col-sm-9">@opportunity.SponsorshipEvidence</dd>
+                                        </dl>
+                                    </div>
+                                </article>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+        }
     </div>
 </div>
