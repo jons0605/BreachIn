@@ -1,0 +1,37 @@
+@page
+@model OpportunitiesModel
+@{
+    ViewData["Title"] = "Opportunities";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-8">
+        <h1 class="display-5 fw-bold">Find Opportunities</h1>
+        <p class="lead text-muted">
+            Search for cybersecurity roles that match your goals.
+        </p>
+
+        <form method="get" class="card shadow-sm mt-4">
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <label asp-for="JobTitleOrKeyword" class="form-label"></label>
+                    <input asp-for="JobTitleOrKeyword" class="form-control" placeholder="For example, security analyst" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Location" class="form-label"></label>
+                    <input asp-for="Location" class="form-control" placeholder="For example, London or remote" />
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="HasVisaSponsorshipPotential" class="form-check-input" />
+                    <label asp-for="HasVisaSponsorshipPotential" class="form-check-label"></label>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Search Opportunities
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
