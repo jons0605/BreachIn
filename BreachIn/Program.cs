@@ -1,7 +1,21 @@
+using BreachIn.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddSingleton<IJobSource, SampleJobSource>();
+builder.Services.AddSingleton<IJobStore>(serviceProvider =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var environment = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+    var connectionString = configuration.GetConnectionString("Jobs")
+        ?? throw new InvalidOperationException(
+            "The ConnectionStrings:Jobs configuration value is required.");
+
+    return new SqliteJobStore(connectionString, environment.ContentRootPath);
+});
+builder.Services.AddScoped<JobIngestionService>();
 
 var app = builder.Build();
 

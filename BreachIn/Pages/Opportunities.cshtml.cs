@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using BreachIn.Models;
+using BreachIn.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -8,70 +9,12 @@ namespace BreachIn.Pages;
 public class OpportunitiesModel : PageModel
 {
     private const string SponsorshipLikely = "Sponsorship Likely";
+    private readonly JobIngestionService _jobIngestionService;
 
-    private static readonly List<Opportunity> SampleOpportunities =
-    [
-        new()
-        {
-            JobTitle = "Security Analyst",
-            Company = "Northstar Cyber Ltd",
-            Location = "London",
-            Salary = "£45,000 - £55,000",
-            SponsorshipStatus = SponsorshipLikely,
-            SponsorshipEvidence = "Sample evidence: employer listed as a licensed UK sponsor.",
-            JobType = "Full-time"
-        },
-        new()
-        {
-            JobTitle = "Penetration Tester",
-            Company = "Redbridge Security",
-            Location = "Manchester",
-            Salary = "£50,000 - £65,000",
-            SponsorshipStatus = "Sponsorship Unclear",
-            SponsorshipEvidence = "No sponsorship information is included in the sample listing.",
-            JobType = "Full-time"
-        },
-        new()
-        {
-            JobTitle = "SOC Analyst",
-            Company = "Bluefort Digital",
-            Location = "Birmingham",
-            Salary = "£35,000 - £45,000",
-            SponsorshipStatus = "No Sponsorship Identified",
-            SponsorshipEvidence = "The sample listing does not identify a sponsorship route.",
-            JobType = "Full-time"
-        },
-        new()
-        {
-            JobTitle = "Cloud Security Engineer",
-            Company = "Cloudhaven Technologies",
-            Location = "Remote (UK)",
-            Salary = "£65,000 - £80,000",
-            SponsorshipStatus = SponsorshipLikely,
-            SponsorshipEvidence = "Sample evidence: employer listed as a licensed UK sponsor.",
-            JobType = "Full-time"
-        },
-        new()
-        {
-            JobTitle = "Cybersecurity Consultant",
-            Company = "Westgate Assurance",
-            Location = "Bristol",
-            Salary = "£55,000 - £70,000",
-            SponsorshipStatus = "Sponsorship Unclear",
-            SponsorshipEvidence = "Sponsorship would need to be confirmed with the sample employer.",
-            JobType = "Full-time"
-        },
-        new()
-        {
-            JobTitle = "Incident Response Analyst",
-            Company = "Sentinel Works",
-            Location = "Leeds",
-            Salary = "£42,000 - £52,000",
-            SponsorshipStatus = "No Sponsorship Identified",
-            SponsorshipEvidence = "The sample listing does not mention visa sponsorship.",
-            JobType = "Contract"
-        }
-    ];
+    public OpportunitiesModel(JobIngestionService jobIngestionService)
+    {
+        _jobIngestionService = jobIngestionService;
+    }
 
     [BindProperty(SupportsGet = true)]
     [Display(Name = "Job title or keyword")]
@@ -89,25 +32,30 @@ public class OpportunitiesModel : PageModel
 
     public IReadOnlyList<Opportunity> Opportunities { get; private set; } = [];
 
-    public void OnGet()
+    public async Task OnGetAsync(CancellationToken cancellationToken)
     {
         if (!SearchSubmitted)
         {
             return;
         }
 
-        IEnumerable<Opportunity> results = SampleOpportunities;
+        IEnumerable<Opportunity> results =
+            await _jobIngestionService.IngestAsync(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(JobTitleOrKeyword))
         {
             results = results.Where(opportunity =>
-                opportunity.JobTitle.Contains(JobTitleOrKeyword, StringComparison.OrdinalIgnoreCase));
+                opportunity.JobTitle.Contains(
+                    JobTitleOrKeyword,
+                    StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrWhiteSpace(Location))
         {
             results = results.Where(opportunity =>
-                opportunity.Location.Contains(Location, StringComparison.OrdinalIgnoreCase));
+                opportunity.Location.Contains(
+                    Location,
+                    StringComparison.OrdinalIgnoreCase));
         }
 
         if (HasVisaSponsorshipPotential)

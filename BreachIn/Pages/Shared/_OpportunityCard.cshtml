@@ -1,0 +1,60 @@
+@model BreachIn.Models.Opportunity
+@{
+    var sponsorshipBadgeClass = Model.SponsorshipStatus switch
+    {
+        "Sponsorship Likely" => "text-bg-success",
+        "Sponsorship Unclear" => "text-bg-warning",
+        _ => "text-bg-secondary"
+    };
+}
+
+<article class="card shadow-sm h-100">
+    <div class="card-body">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+            <div>
+                <h3 class="card-title h4 mb-1">@Model.JobTitle</h3>
+                <p class="card-subtitle text-muted">@Model.Company</p>
+            </div>
+            <div>
+                <span class="badge @sponsorshipBadgeClass">@Model.SponsorshipStatus</span>
+            </div>
+        </div>
+
+        <dl class="row mt-4 mb-0">
+            <dt class="col-sm-3">Location</dt>
+            <dd class="col-sm-9">@Model.Location</dd>
+
+            <dt class="col-sm-3">Salary</dt>
+            <dd class="col-sm-9">@Model.Salary</dd>
+
+            <dt class="col-sm-3">Job type</dt>
+            <dd class="col-sm-9">@Model.JobType</dd>
+
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9">@Model.Description</dd>
+
+            @if (Model.PostedDate.HasValue)
+            {
+                <dt class="col-sm-3">Posted</dt>
+                <dd class="col-sm-9">@Model.PostedDate.Value.ToString("dd MMM yyyy")</dd>
+            }
+
+            <dt class="col-sm-3">Sponsorship evidence</dt>
+            <dd class="col-sm-9">@Model.SponsorshipEvidence</dd>
+
+            <dt class="col-sm-3">Source</dt>
+            <dd class="col-sm-9">
+                @if (Model.SourceUrl is not null)
+                {
+                    <a href="@Model.SourceUrl" target="_blank" rel="noopener noreferrer">
+                        View on @Model.Source
+                    </a>
+                }
+                else
+                {
+                    @Model.Source
+                }
+            </dd>
+        </dl>
+    </div>
+</article>
