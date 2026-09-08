@@ -15,7 +15,15 @@ builder.Services.AddSingleton<IJobStore>(serviceProvider =>
 
     return new SqliteJobStore(connectionString, environment.ContentRootPath);
 });
-builder.Services.AddScoped<JobIngestionService>();
+builder.Services.AddSingleton<JobIngestionService>();
+builder.Services
+    .AddOptions<JobIngestionOptions>()
+    .Bind(builder.Configuration.GetSection(JobIngestionOptions.SectionName))
+    .Validate(
+        options => options.Interval >= TimeSpan.FromHours(1),
+        "The job ingestion interval must be at least one hour.")
+    .ValidateOnStart();
+builder.Services.AddHostedService<JobIngestionBackgroundService>();
 
 var app = builder.Build();
 
