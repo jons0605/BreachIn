@@ -36,14 +36,16 @@
 
         @if (Model.SearchSubmitted)
         {
-            <section class="mt-5" aria-labelledby="sample-results-heading">
-                <h2 id="sample-results-heading" class="h3">Sample Data</h2>
-                <p class="text-muted">Sample data — no external job sources are connected yet</p>
+            <section class="mt-5" aria-labelledby="results-heading">
+                <h2 id="results-heading" class="h3">Opportunities</h2>
+                <p class="text-muted">
+                    Live listings link to their original source. Sponsorship remains unverified unless evidence is shown.
+                </p>
 
                 @if (Model.Opportunities.Count == 0)
                 {
                     <div class="alert alert-info" role="status">
-                        No sample opportunities matched your search.
+                        No cached opportunities matched your search.
                     </div>
                 }
                 else

@@ -4,7 +4,7 @@ BreachIn is an open-source career opportunity discovery platform focused initial
 
 ## Project Status
 
-BreachIn is an early-stage open-source prototype. The application currently ingests clearly labelled sample opportunities into a local SQLite catalogue and provides a simple search interface. It is not yet connected to live job sources and does not include user accounts.
+BreachIn is an early-stage open-source prototype. The application ingests selected public Lever postings into a local SQLite catalogue and provides a simple search interface. It does not include user accounts.
 
 ## Current Features
 
@@ -18,16 +18,16 @@ BreachIn is an early-stage open-source prototype. The application currently inge
 - Opportunity normalization and deterministic deduplication
 - Configurable scheduled ingestion with a two-hour default cadence
 - Persistent SQLite opportunity storage
-- Sample cybersecurity opportunity results
-- Sample sponsorship indicators and evidence
+- Configurable Lever Postings API source
+- Links to original Lever-hosted vacancy pages
+- Optional sample cybersecurity opportunities
 - Responsive Bootstrap styling
-- Automated tests for SQLite persistence and repeat ingestion
+- Automated tests for persistence, scheduling, cached searches, and Lever mapping
 
-All current opportunity and sponsorship information is sample data. No external job API, live vacancy source, official sponsor-register integration, or authentication is implemented.
+Lever opportunities are live vacancy data, but their sponsorship status has not yet been analyzed. A licensed-sponsor match would not by itself prove that an individual vacancy offers sponsorship.
 
 ## Next Milestones
 
-- First permitted live job source
 - GOV.UK licensed sponsor-register ingestion and matching
 - Vacancy-level sponsorship evidence analysis
 - Salary and location filters
@@ -76,6 +76,8 @@ Open the local address shown in the terminal.
 The application creates its local SQLite database at `BreachIn/App_Data/breachin.db` when the opportunity store is first used. The database and its journal files are ignored by Git.
 
 Opportunity ingestion runs when the application starts and then every two hours by default. Configure this through the `JobIngestion` section in `appsettings.json`. Searches query the cached SQLite catalogue and do not trigger external source requests.
+
+The `Lever` configuration section contains an explicit allowlist of company site names and security-related keywords. Lever does not require credentials for reading published postings. Each opportunity stores Lever's `hostedUrl`, which opens the full vacancy page; BreachIn does not send users directly to the application form. Optional sample data can be enabled through `SampleData:Enabled`.
 
 ### Build and Test
 
@@ -129,14 +131,14 @@ Scheduled background ingestion
       Opportunities Razor Page
 ```
 
-`SampleJobSource` is currently the only registered source. `SqliteJobStore` implements `IJobStore`, keeping the page and ingestion service independent of SQLite-specific details.
+`LeverJobSource` is the first live source. `SqliteJobStore` implements `IJobStore`, keeping the page and ingestion service independent of Lever and SQLite-specific details. `SampleJobSource` remains available for development but is disabled by default.
 
 ## Roadmap
 
 - [x] Add provider-neutral opportunity ingestion
 - [x] Add persistent SQLite opportunity storage
 - [x] Add scheduled ingestion
-- [ ] Connect the first permitted live job source
+- [x] Connect the first permitted live job source
 - [ ] Ingest and match the official UK sponsor register
 - [ ] Analyze vacancy-level sponsorship evidence
 - [ ] Add salary and location filters
