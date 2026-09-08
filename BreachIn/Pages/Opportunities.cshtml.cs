@@ -9,11 +9,11 @@ namespace BreachIn.Pages;
 public class OpportunitiesModel : PageModel
 {
     private const string SponsorshipLikely = "Sponsorship Likely";
-    private readonly JobIngestionService _jobIngestionService;
+    private readonly IJobStore _jobStore;
 
-    public OpportunitiesModel(JobIngestionService jobIngestionService)
+    public OpportunitiesModel(IJobStore jobStore)
     {
-        _jobIngestionService = jobIngestionService;
+        _jobStore = jobStore;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -39,8 +39,7 @@ public class OpportunitiesModel : PageModel
             return;
         }
 
-        IEnumerable<Opportunity> results =
-            await _jobIngestionService.IngestAsync(cancellationToken);
+        IEnumerable<Opportunity> results = await _jobStore.GetAllAsync(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(JobTitleOrKeyword))
         {

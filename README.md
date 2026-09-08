@@ -4,7 +4,7 @@ BreachIn is an open-source career opportunity discovery platform focused initial
 
 ## Project Status
 
-BreachIn is an early-stage open-source prototype. The current application provides a simple opportunity search interface, but it is not yet connected to job data, a database, or user accounts.
+BreachIn is an early-stage open-source prototype. The application currently ingests clearly labelled sample opportunities into a local SQLite catalogue and provides a simple search interface. It is not yet connected to live job sources and does not include user accounts.
 
 ## Current Features
 
@@ -14,14 +14,22 @@ BreachIn is an early-stage open-source prototype. The current application provid
 - Job title or keyword input
 - Location input
 - UK visa sponsorship potential filter
+- Provider-neutral job-source and storage abstractions
+- Opportunity normalization and deterministic deduplication
+- Configurable scheduled ingestion with a two-hour default cadence
+- Persistent SQLite opportunity storage
+- Sample cybersecurity opportunity results
+- Sample sponsorship indicators and evidence
 - Responsive Bootstrap styling
+- Automated tests for SQLite persistence and repeat ingestion
 
-The search form is currently a user interface only. No external job API, database, or authentication is implemented.
+All current opportunity and sponsorship information is sample data. No external job API, live vacancy source, official sponsor-register integration, or authentication is implemented.
 
-## Planned Features
+## Next Milestones
 
-- Integration with real job opportunity data
-- UK sponsorship eligibility information and supporting evidence
+- First permitted live job source
+- GOV.UK licensed sponsor-register ingestion and matching
+- Vacancy-level sponsorship evidence analysis
 - Salary and location filters
 - Job details pages
 - Saved opportunities
@@ -65,6 +73,20 @@ dotnet run --project BreachIn/BreachIn.csproj
 
 Open the local address shown in the terminal.
 
+The application creates its local SQLite database at `BreachIn/App_Data/breachin.db` when the opportunity store is first used. The database and its journal files are ignored by Git.
+
+Opportunity ingestion runs when the application starts and then every two hours by default. Configure this through the `JobIngestion` section in `appsettings.json`. Searches query the cached SQLite catalogue and do not trigger external source requests.
+
+### Build and Test
+
+From the repository root:
+
+```bash
+dotnet restore
+dotnet build BreachIn.slnx --configuration Release --no-restore
+dotnet test BreachIn.slnx --configuration Release --no-build --no-restore
+```
+
 ### Run with Visual Studio
 
 1. Open `BreachIn.slnx` in Visual Studio.
@@ -76,22 +98,47 @@ Open the local address shown in the terminal.
 ```text
 BreachIn/
 ├── BreachIn.slnx              # Solution file
+├── AGENTS.md                   # Repository and architecture guidance
+├── CONTRIBUTING.md             # Contribution guidance
 ├── LICENSE                    # MIT License
 ├── README.md                  # Project documentation
+├── SECURITY.md                 # Vulnerability reporting guidance
+├── BreachIn.Tests/             # Automated tests
 └── BreachIn/
-    ├── Pages/                 # Razor Pages and page models
-    │   ├── Index.cshtml       # Landing page
-    │   └── Opportunities.cshtml
-    ├── wwwroot/               # CSS, JavaScript, and client libraries
-    ├── BreachIn.csproj        # Application project
-    └── Program.cs             # Application startup
+    ├── Models/                 # Opportunity domain model
+    ├── Pages/                  # Razor Pages and page models
+    ├── Services/               # Job sources, ingestion, and storage
+    ├── wwwroot/                # CSS, JavaScript, and client libraries
+    ├── BreachIn.csproj         # Application project
+    └── Program.cs              # Application startup
 ```
+
+## Current Architecture
+
+```text
+Registered IJobSource implementations
+              ↓
+Scheduled background ingestion
+              ↓
+      JobIngestionService
+              ↓
+     Normalize + deduplicate
+              ↓
+          IJobStore
+              ↓
+      Opportunities Razor Page
+```
+
+`SampleJobSource` is currently the only registered source. `SqliteJobStore` implements `IJobStore`, keeping the page and ingestion service independent of SQLite-specific details.
 
 ## Roadmap
 
-- [ ] Connect to real job opportunity data
-- [ ] Add UK sponsorship eligibility information
-- [ ] Show sponsorship evidence and its source
+- [x] Add provider-neutral opportunity ingestion
+- [x] Add persistent SQLite opportunity storage
+- [x] Add scheduled ingestion
+- [ ] Connect the first permitted live job source
+- [ ] Ingest and match the official UK sponsor register
+- [ ] Analyze vacancy-level sponsorship evidence
 - [ ] Add salary and location filters
 - [ ] Add job details
 - [ ] Allow users to save opportunities
